@@ -1,26 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { parseCSV } from '../utils/csvParser';
-import { buildQuestionOptions, getFallbackWrongAnswers } from '../utils/shuffleAnswers';
-import { cleanDisplayText } from '../utils/textCleanup';
 
 export function useQuiz() {
   const [screen, setScreen] = useState('loading');
-  const [questions, setQuestions] = useState([]);
+  const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [showHint, setShowHint] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [revealedCards, setRevealedCards] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function loadQuestions() {
+    async function loadCards() {
       try {
-        const [csvRes, distractorsRes, explanationsRes] = await Promise.all([
-          fetch('/questions.csv'),
-          fetch('/distractors.json'),
-          fetch('/explanations.json'),
-        ]);
+        const csvRes = await fetch('/questions.csv');
 
         if (!csvRes.ok) {
           throw new Error('Impossible de charger questions.csv');
@@ -29,40 +21,7 @@ export function useQuiz() {
         const csvText = await csvRes.text();
         const parsed = parseCSV(csvText);
 
-        let distractorsMap = new Map();
-        if (distractorsRes.ok) {
-          const distractors = await distractorsRes.json();
-          distractorsMap = new Map(
-            distractors.map((item) => [item.question, item.wrongAnswers])
-          );
-        }
-
-        let explanationsMap = new Map();
-        if (explanationsRes.ok) {
-          const explanations = await explanationsRes.json();
-          explanationsMap = new Map(
-            explanations.map((item) => [item.question, { hint: item.hint, explanation: item.explanation }])
-          );
-        }
-
-        const enriched = parsed.map(({ question, correctAnswer }) => {
-          const wrongAnswers =
-            distractorsMap.get(question) ?? getFallbackWrongAnswers(correctAnswer);
-          const explanationData = explanationsMap.get(question) ?? {
-            hint: 'Consultez la charte graphique LPEE pour trouver la réponse.',
-            explanation: `La bonne réponse est : ${correctAnswer}`,
-          };
-
-          return {
-            question,
-            correctAnswer,
-            hint: cleanDisplayText(explanationData.hint),
-            explanation: cleanDisplayText(explanationData.explanation),
-            options: buildQuestionOptions(correctAnswer, wrongAnswers),
-          };
-        });
-
-        setQuestions(enriched);
+        setCards(parsed.map(({ question, correctAnswer }) => ({ question, correctAnswer })));
         setScreen('start');
       } catch (err) {
         setError(err.message);
@@ -70,91 +29,64 @@ export function useQuiz() {
       }
     }
 
-    loadQuestions();
+    loadCards();
   }, []);
 
-  const resetProgress = useCallback(() => {
+  const resetSession = useCallback(() => {
     setCurrentIndex(0);
-    setCorrectCount(0);
-    setSelectedAnswer(null);
-    setIsCorrect(false);
-    setShowHint(false);
-    setScreen('question');
+    setRevealed(false);
+    setRevealedCards({});
+    setScreen('card');
   }, []);
 
   const startQuiz = useCallback(() => {
-    resetProgress();
-  }, [resetProgress]);
+    resetSession();
+  }, [resetSession]);
 
-  const selectAnswer = useCallback((option) => {
-    if (screen === 'feedback') return;
+  const revealAnswer = useCallback(() => {
+    setRevealed(true);
+    setRevealedCards((prev) => ({ ...prev, [currentIndex]: true }));
+  }, [currentIndex]);
 
-    setSelectedAnswer(option);
-    const correct = option.isCorrect;
-    setIsCorrect(correct);
+  const goToCard = useCallback((index) => {
+    setCurrentIndex(index);
+    setRevealed(Boolean(revealedCards[index]));
+  }, [revealedCards]);
 
-    if (correct) {
-      setCorrectCount((prev) => prev + 1);
-    }
-
-    setScreen('feedback');
-  }, [screen]);
-
-  const nextQuestion = useCallback(() => {
-    if (currentIndex + 1 >= questions.length) {
+  const nextCard = useCallback(() => {
+    if (currentIndex + 1 >= cards.length) {
       setScreen('result');
       return;
     }
+    goToCard(currentIndex + 1);
+  }, [currentIndex, cards.length, goToCard]);
 
-    setCurrentIndex((prev) => prev + 1);
-    setSelectedAnswer(null);
-    setIsCorrect(false);
-    setShowHint(false);
-    setScreen('question');
-  }, [currentIndex, questions.length]);
-
-  const prevQuestion = useCallback(() => {
+  const prevCard = useCallback(() => {
     if (currentIndex <= 0) return;
-
-    setCurrentIndex((prev) => prev - 1);
-    setSelectedAnswer(null);
-    setIsCorrect(false);
-    setShowHint(false);
-    setScreen('question');
-  }, [currentIndex]);
+    goToCard(currentIndex - 1);
+  }, [currentIndex, goToCard]);
 
   const restartQuiz = useCallback(() => {
     setCurrentIndex(0);
-    setCorrectCount(0);
-    setSelectedAnswer(null);
-    setIsCorrect(false);
-    setShowHint(false);
+    setRevealed(false);
+    setRevealedCards({});
     setScreen('start');
   }, []);
 
-  const toggleHint = useCallback(() => {
-    setShowHint((prev) => !prev);
-  }, []);
-
-  const currentQuestion = questions[currentIndex] ?? null;
+  const currentCard = cards[currentIndex] ?? null;
 
   return {
     screen,
-    questions,
+    cards,
     currentIndex,
-    currentQuestion,
-    correctCount,
-    selectedAnswer,
-    isCorrect,
-    showHint,
+    currentCard,
+    revealed,
     error,
-    totalQuestions: questions.length,
+    totalCards: cards.length,
     startQuiz,
-    selectAnswer,
-    nextQuestion,
-    prevQuestion,
+    revealAnswer,
+    nextCard,
+    prevCard,
     restartQuiz,
-    resetProgress,
-    toggleHint,
   };
 }

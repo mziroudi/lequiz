@@ -33,6 +33,34 @@
   margin-bottom: 1.25rem;
 }
 
+.scoreRow {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.scoreItem {
+  text-align: center;
+}
+
+.scoreCorrect {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.scoreIncorrect {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-error);
+}
+
+.scoreLabel {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
 .starFilled {
   font-size: 1.75rem;
   color: var(--color-primary);

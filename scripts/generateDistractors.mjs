@@ -61,14 +61,17 @@ function parseCSV(text) {
     .filter((item) => item.question && item.correctAnswer);
 }
 
-function getStaticFallback(correctAnswer) {
+function getStaticFallback() {
   return [
     'Aucune de ces réponses',
     'Information non précisée dans la charte',
-    correctAnswer.length > 30
-      ? `${correctAnswer.slice(0, 30)}…`
-      : 'Réponse non conforme à la charte LPEE',
+    'Réponse non conforme à la charte LPEE',
   ];
+}
+
+function isStaleDistractor(item) {
+  if (!item?.wrongAnswers || item.wrongAnswers.length !== 3) return true;
+  return item.wrongAnswers.some((a) => /…|\.\.\./.test(a));
 }
 
 async function generateWithClaude(question, correctAnswer, apiKey) {
@@ -150,7 +153,8 @@ async function main() {
     if (
       cached &&
       Array.isArray(cached.wrongAnswers) &&
-      cached.wrongAnswers.length === 3
+      cached.wrongAnswers.length === 3 &&
+      !isStaleDistractor(cached)
     ) {
       skipped++;
       continue;
@@ -166,10 +170,10 @@ async function main() {
         generated++;
       } catch (error) {
         console.warn(`Échec Claude pour "${question.slice(0, 40)}…" : ${error.message}`);
-        wrongAnswers = getStaticFallback(correctAnswer);
+        wrongAnswers = getStaticFallback();
       }
     } else {
-      wrongAnswers = getStaticFallback(correctAnswer);
+      wrongAnswers = getStaticFallback();
       generated++;
     }
 

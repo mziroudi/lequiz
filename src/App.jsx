@@ -1,30 +1,26 @@
 import { useQuiz } from './hooks/useQuiz';
 import QuizStart from './components/QuizStart';
-import QuizQuestion from './components/QuizQuestion';
+import Flashcard from './components/Flashcard';
 import QuizResult from './components/QuizResult';
 import styles from './App.module.css';
 
 export default function App() {
   const {
     screen,
-    currentQuestion,
+    currentCard,
     currentIndex,
-    correctCount,
-    totalQuestions,
+    revealed,
+    totalCards,
     startQuiz,
-    selectAnswer,
-    nextQuestion,
-    prevQuestion,
+    revealAnswer,
+    nextCard,
+    prevCard,
     restartQuiz,
-    resetProgress,
-    selectedAnswer,
-    showHint,
-    toggleHint,
     error,
   } = useQuiz();
 
-  const isLastQuestion = currentIndex + 1 >= totalQuestions;
-  const isFirstQuestion = currentIndex === 0;
+  const isLastCard = currentIndex + 1 >= totalCards;
+  const isFirstCard = currentIndex === 0;
 
   return (
     <div className="app-shell">
@@ -32,7 +28,7 @@ export default function App() {
         {screen === 'loading' && (
           <div className={styles.loading} role="status" aria-live="polite">
             <img src="/logo-lpee.png" alt="" className={styles.loadingLogo} aria-hidden="true" />
-            <p>Chargement du quiz…</p>
+            <p>Chargement des flashcards…</p>
           </div>
         )}
 
@@ -41,31 +37,26 @@ export default function App() {
         )}
 
         {screen === 'start' && (
-          <QuizStart onStart={startQuiz} questionCount={totalQuestions} />
+          <QuizStart onStart={startQuiz} questionCount={totalCards} />
         )}
 
-        {(screen === 'question' || screen === 'feedback') && currentQuestion && (
-          <QuizQuestion
-            question={currentQuestion}
-            questionNumber={currentIndex + 1}
-            totalQuestions={totalQuestions}
-            screen={screen}
-            selectedAnswer={selectedAnswer}
-            showHint={showHint}
-            onToggleHint={toggleHint}
-            onSelectAnswer={selectAnswer}
-            onNext={nextQuestion}
-            onPrev={prevQuestion}
-            onReset={resetProgress}
-            isLastQuestion={isLastQuestion}
-            isFirstQuestion={isFirstQuestion}
+        {screen === 'card' && currentCard && (
+          <Flashcard
+            card={currentCard}
+            cardNumber={currentIndex + 1}
+            totalCards={totalCards}
+            revealed={revealed}
+            onReveal={revealAnswer}
+            onPrev={prevCard}
+            onNext={nextCard}
+            isLastCard={isLastCard}
+            isFirstCard={isFirstCard}
           />
         )}
 
         {screen === 'result' && (
           <QuizResult
-            correctCount={correctCount}
-            totalQuestions={totalQuestions}
+            totalQuestions={totalCards}
             onRestart={restartQuiz}
             onRetry={startQuiz}
           />

@@ -18,12 +18,10 @@ export function buildQuestionOptions(correctAnswer, wrongAnswers) {
   return shuffleArray(options);
 }
 
-export function getFallbackWrongAnswers(correctAnswer) {
+export function getFallbackWrongAnswers() {
   return [
     'Aucune de ces réponses',
     'Information non précisée dans la charte',
-    correctAnswer.length > 20
-      ? `${correctAnswer.slice(0, 20)}… (version alternative)`
-      : 'Réponse non conforme à la charte LPEE',
+    'Réponse non conforme à la charte LPEE',
   ];
 }

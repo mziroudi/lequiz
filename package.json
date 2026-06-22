@@ -10,10 +10,11 @@
     "generate-questions": "node scripts/generateDistractors.mjs",
     "extract-pdf": "node scripts/extractPdfText.mjs",
     "generate-explanations": "node scripts/generateExplanations.mjs",
-    "predev": "npm run extract-pdf && npm run generate-questions && npm run generate-explanations",
-    "prebuild": "npm run extract-pdf && npm run generate-questions && npm run generate-explanations"
+    "predev": "npm run extract-pdf && npm run generate-questions",
+    "prebuild": "npm run extract-pdf && npm run generate-questions"
   },
   "dependencies": {
+    "motion": "^12.40.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

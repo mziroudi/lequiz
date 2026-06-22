@@ -300,7 +300,7 @@ function buildHint(question, correctAnswer, passage) {
       .replace(/\?.*$/, '')
       .replace(/^(quelle|quel|quels|quelles|citez|complétez|définissez|comment|pourquoi|peut-on|est-il)\s+/i, '')
       .trim();
-    return `Indice : consultez la section de la charte sur « ${truncate(topic, 70)} ».`;
+    return `Indice : consultez la section de la charte sur « ${topic} ».`;
   }
 
   return `Indice : relisez la charte graphique LPEE en lien avec cette question.`;
@@ -308,7 +308,7 @@ function buildHint(question, correctAnswer, passage) {
 
 function buildExplanation(correctAnswer, passage) {
   if (passage) {
-    return `D'après la charte graphique LPEE : ${truncate(passage, 260)} La réponse attendue est : ${correctAnswer}`;
+    return `D'après la charte graphique LPEE : ${passage} La réponse attendue est : ${correctAnswer}`;
   }
   return `La bonne réponse est : ${correctAnswer}. Cette information est définie dans la charte graphique officielle du LPEE.`;
 }
