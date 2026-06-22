@@ -43,12 +43,12 @@ export default function QuizResult({ totalQuestions, onRestart, onRetry }) {
           type="button"
           className={styles.secondaryButton}
           onClick={onRestart}
-          aria-label="Retour à l'accueil"
+          aria-label="Retour au choix des sections"
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.15 }}
         >
-          Retour à l&apos;accueil
+          Retour aux sections
         </motion.button>
       </div>
     </motion.section>

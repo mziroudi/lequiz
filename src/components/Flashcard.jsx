@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { getSectionLabel } from '../data/sections';
 import {
   easeSmooth,
   flipTransition,
@@ -24,12 +25,35 @@ function NextIcon() {
   );
 }
 
+function ResetIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M3 12a9 9 0 0 1 15.36-6.36M21 12a9 9 0 0 1-15.36 6.36"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M21 3v6h-6M3 21v-6h6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function Flashcard({
   card,
   cardNumber,
   totalCards,
   revealed,
   onReveal,
+  onReset,
+  onBackToSections,
   onPrev,
   onNext,
   isFirstCard,
@@ -37,6 +61,7 @@ export default function Flashcard({
 }) {
   const [slideDirection, setSlideDirection] = useState('next');
   const isBlueCard = cardNumber % 2 === 1;
+  const sectionLabel = getSectionLabel(card.section);
 
   function handlePrev() {
     setSlideDirection('prev');
@@ -50,6 +75,19 @@ export default function Flashcard({
 
   return (
     <section className={styles.flashcard} aria-label="Flashcard">
+      <motion.button
+        type="button"
+        className={styles.backToSections}
+        onClick={onBackToSections}
+        aria-label="Retour au choix des sections"
+        whileHover={{ x: -2 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.15 }}
+      >
+        <PrevIcon />
+        Choisir une section
+      </motion.button>
+
       <AnimatePresence mode="wait">
         <motion.div
           key={isBlueCard ? 'glow-blue' : 'glow-orange'}
@@ -93,6 +131,7 @@ export default function Flashcard({
               tabIndex={0}
             >
               <header className={styles.cardHeader}>
+                <span className={styles.sectionBadge}>{sectionLabel}</span>
                 <span className={styles.counter}>
                   {cardNumber} / {totalCards}
                 </span>
@@ -123,6 +162,7 @@ export default function Flashcard({
               aria-labelledby="card-answer"
             >
               <header className={styles.cardHeaderBack}>
+                <span className={styles.sectionBadgeBack}>{sectionLabel}</span>
                 <span className={styles.counterBack}>
                   {cardNumber} / {totalCards}
                 </span>
@@ -154,6 +194,19 @@ export default function Flashcard({
           transition={{ duration: 0.15 }}
         >
           <PrevIcon />
+        </motion.button>
+
+        <motion.button
+          type="button"
+          className={`${styles.navCircle} ${styles.navReset}`}
+          onClick={onReset}
+          disabled={!revealed}
+          aria-label="Réinitialiser la carte"
+          whileHover={revealed ? { scale: 1.06, backgroundColor: 'rgba(0, 95, 170, 0.06)' } : undefined}
+          whileTap={revealed ? { scale: 0.95 } : undefined}
+          transition={{ duration: 0.15 }}
+        >
+          <ResetIcon />
         </motion.button>
 
         <motion.button

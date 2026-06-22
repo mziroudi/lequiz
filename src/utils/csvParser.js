@@ -32,13 +32,22 @@ export function parseCSV(text) {
     .filter((line) => line.length > 0);
 
   return lines.map((line) => {
-    const [question, ...answerParts] = parseCSVLine(line);
-    const correctAnswer = answerParts.join(',').trim();
+    const fields = parseCSVLine(line);
+    if (fields.length < 2) {
+      return null;
+    }
+
+    const question = fields[0];
+    const section = fields.length >= 3 ? fields[fields.length - 1] : 'autre';
+    const correctAnswer = (fields.length >= 3
+      ? fields.slice(1, -1)
+      : fields.slice(1)
+    ).join(',').trim();
 
     if (!question || !correctAnswer) {
       return null;
     }
 
-    return { question, correctAnswer };
+    return { question, correctAnswer, section };
   }).filter(Boolean);
 }

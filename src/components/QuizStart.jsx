@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { fadeUpTransition, fadeUpVariants } from '../motion/transitions';
 import styles from './QuizStart.module.css';
 
-export default function QuizStart({ onStart, questionCount }) {
+export default function QuizStart({ onStart, questionCount, sections }) {
   return (
     <motion.section
       className={styles.start}
@@ -21,29 +21,47 @@ export default function QuizStart({ onStart, questionCount }) {
       </div>
 
       <h1 id="quiz-title" className={styles.title}>
-          Flashcards Charte LPEE
-        </h1>
-        <p className={styles.subtitle}>
-          Révisez la charte graphique officielle : question au recto,
-          réponse au verso. Évaluez-vous carte après carte.
-        </p>
+        Flashcards Charte LPEE
+      </h1>
+      <p className={styles.subtitle}>
+        Choisissez une section de la charte ou révisez l&apos;ensemble des cartes.
+      </p>
 
-        <p className={styles.info}>
-          {questionCount > 0 ? `${questionCount} cartes` : 'Chargement…'}
-        </p>
+      <p className={styles.info}>
+        {questionCount > 0 ? `${questionCount} cartes au total` : 'Chargement…'}
+      </p>
 
+      <div className={styles.sections} role="list" aria-label="Sections de la charte">
         <motion.button
           type="button"
-          className={styles.button}
-          onClick={onStart}
+          className={`${styles.sectionButton} ${styles.sectionButtonAll}`}
+          onClick={() => onStart(null)}
           disabled={questionCount === 0}
-          aria-label="Commencer les flashcards LPEE"
-          whileHover={questionCount > 0 ? { scale: 1.03 } : undefined}
+          aria-label={`Réviser toutes les cartes (${questionCount})`}
+          whileHover={questionCount > 0 ? { scale: 1.02 } : undefined}
           whileTap={questionCount > 0 ? { scale: 0.98 } : undefined}
           transition={{ duration: 0.15 }}
         >
-          Commencer
+          <span className={styles.sectionLabel}>Toutes les sections</span>
+          <span className={styles.sectionCount}>{questionCount} cartes</span>
         </motion.button>
+
+        {sections.map((section) => (
+          <motion.button
+            key={section.id}
+            type="button"
+            className={styles.sectionButton}
+            onClick={() => onStart(section.id)}
+            aria-label={`Réviser ${section.label} (${section.count} cartes)`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+          >
+            <span className={styles.sectionLabel}>{section.label}</span>
+            <span className={styles.sectionCount}>{section.count} cartes</span>
+          </motion.button>
+        ))}
+      </div>
     </motion.section>
   );
 }

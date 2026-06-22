@@ -11,8 +11,12 @@ export default function App() {
     currentIndex,
     revealed,
     totalCards,
+    totalAllCards,
+    sections,
+    selectedSection,
     startQuiz,
     revealAnswer,
+    resetCard,
     nextCard,
     prevCard,
     restartQuiz,
@@ -37,7 +41,11 @@ export default function App() {
         )}
 
         {screen === 'start' && (
-          <QuizStart onStart={startQuiz} questionCount={totalCards} />
+          <QuizStart
+            onStart={startQuiz}
+            questionCount={totalAllCards}
+            sections={sections}
+          />
         )}
 
         {screen === 'card' && currentCard && (
@@ -47,6 +55,8 @@ export default function App() {
             totalCards={totalCards}
             revealed={revealed}
             onReveal={revealAnswer}
+            onReset={resetCard}
+            onBackToSections={restartQuiz}
             onPrev={prevCard}
             onNext={nextCard}
             isLastCard={isLastCard}
@@ -58,7 +68,7 @@ export default function App() {
           <QuizResult
             totalQuestions={totalCards}
             onRestart={restartQuiz}
-            onRetry={startQuiz}
+            onRetry={() => startQuiz(selectedSection)}
           />
         )}
       </div>

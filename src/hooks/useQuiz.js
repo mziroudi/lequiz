@@ -1,9 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { parseCSV } from '../utils/csvParser';
+import { getOrderedSectionsWithCounts } from '../data/sections';
 
 export function useQuiz() {
   const [screen, setScreen] = useState('loading');
-  const [cards, setCards] = useState([]);
+  const [allCards, setAllCards] = useState([]);
+  const [activeCards, setActiveCards] = useState([]);
+  const [selectedSection, setSelectedSection] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [revealedCards, setRevealedCards] = useState({});
@@ -21,7 +24,7 @@ export function useQuiz() {
         const csvText = await csvRes.text();
         const parsed = parseCSV(csvText);
 
-        setCards(parsed.map(({ question, correctAnswer }) => ({ question, correctAnswer })));
+        setAllCards(parsed);
         setScreen('start');
       } catch (err) {
         setError(err.message);
@@ -32,20 +35,36 @@ export function useQuiz() {
     loadCards();
   }, []);
 
-  const resetSession = useCallback(() => {
+  const sections = useMemo(
+    () => getOrderedSectionsWithCounts(allCards),
+    [allCards],
+  );
+
+  const startQuiz = useCallback((sectionId = null) => {
+    const filtered = sectionId
+      ? allCards.filter((card) => card.section === sectionId)
+      : allCards;
+
+    setActiveCards(filtered);
+    setSelectedSection(sectionId);
     setCurrentIndex(0);
     setRevealed(false);
     setRevealedCards({});
     setScreen('card');
-  }, []);
-
-  const startQuiz = useCallback(() => {
-    resetSession();
-  }, [resetSession]);
+  }, [allCards]);
 
   const revealAnswer = useCallback(() => {
     setRevealed(true);
     setRevealedCards((prev) => ({ ...prev, [currentIndex]: true }));
+  }, [currentIndex]);
+
+  const resetCard = useCallback(() => {
+    setRevealed(false);
+    setRevealedCards((prev) => {
+      const next = { ...prev };
+      delete next[currentIndex];
+      return next;
+    });
   }, [currentIndex]);
 
   const goToCard = useCallback((index) => {
@@ -54,12 +73,12 @@ export function useQuiz() {
   }, [revealedCards]);
 
   const nextCard = useCallback(() => {
-    if (currentIndex + 1 >= cards.length) {
+    if (currentIndex + 1 >= activeCards.length) {
       setScreen('result');
       return;
     }
     goToCard(currentIndex + 1);
-  }, [currentIndex, cards.length, goToCard]);
+  }, [currentIndex, activeCards.length, goToCard]);
 
   const prevCard = useCallback(() => {
     if (currentIndex <= 0) return;
@@ -70,21 +89,28 @@ export function useQuiz() {
     setCurrentIndex(0);
     setRevealed(false);
     setRevealedCards({});
+    setActiveCards([]);
+    setSelectedSection(null);
     setScreen('start');
   }, []);
 
-  const currentCard = cards[currentIndex] ?? null;
+  const currentCard = activeCards[currentIndex] ?? null;
 
   return {
     screen,
-    cards,
+    allCards,
+    activeCards,
+    sections,
+    selectedSection,
     currentIndex,
     currentCard,
     revealed,
     error,
-    totalCards: cards.length,
+    totalCards: activeCards.length,
+    totalAllCards: allCards.length,
     startQuiz,
     revealAnswer,
+    resetCard,
     nextCard,
     prevCard,
     restartQuiz,

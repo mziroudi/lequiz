@@ -40,27 +40,59 @@
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--color-text-muted);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
-.button {
-  display: block;
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
   width: 100%;
-  max-width: 280px;
-  margin: 0 auto;
-  padding: 0.75rem 1.5rem;
-  background: var(--color-blue);
-  color: #fff;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  border-radius: 8px;
-  transition: background var(--transition);
+  max-width: 520px;
 }
 
-.button:hover:not(:disabled) {
-  background: var(--color-blue-dark);
+.sectionButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  background: #ffffff;
+  text-align: left;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
+
+.sectionButton:hover:not(:disabled) {
+  border-color: rgba(0, 95, 170, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 95, 170, 0.08);
+}
+
+.sectionButtonAll {
+  border-color: rgba(0, 95, 170, 0.35);
+  background: linear-gradient(135deg, rgba(0, 95, 170, 0.06) 0%, rgba(246, 160, 0, 0.06) 100%);
+}
+
+.sectionLabel {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.sectionCount {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-blue);
+  background: rgba(0, 95, 170, 0.08);
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+}
+
 
 @media (min-width: 480px) {
   .logo {

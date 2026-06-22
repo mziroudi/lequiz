@@ -50,8 +50,13 @@ function parseCSVLine(line) {
 
 function parseCSV(text) {
   return text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((line) => {
-    const [question, ...answerParts] = parseCSVLine(line);
-    return { question, correctAnswer: answerParts.join(',').trim() };
+    const fields = parseCSVLine(line);
+    const question = fields[0];
+    const correctAnswer = (fields.length >= 3
+      ? fields.slice(1, -1)
+      : fields.slice(1)
+    ).join(',').trim();
+    return { question, correctAnswer };
   }).filter((item) => item.question && item.correctAnswer);
 }
 
