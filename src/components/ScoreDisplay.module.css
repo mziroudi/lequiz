@@ -1,0 +1,11 @@
+.score {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.score strong {
+  color: var(--color-primary);
+  font-weight: 700;
+}

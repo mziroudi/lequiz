@@ -1,0 +1,25 @@
+{
+  "name": "quiz-lpee",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "generate-questions": "node scripts/generateDistractors.mjs",
+    "extract-pdf": "node scripts/extractPdfText.mjs",
+    "generate-explanations": "node scripts/generateExplanations.mjs",
+    "predev": "npm run extract-pdf && npm run generate-questions && npm run generate-explanations",
+    "prebuild": "npm run extract-pdf && npm run generate-questions && npm run generate-explanations"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.5.2",
+    "pdf-parse": "^2.4.5",
+    "vite": "^6.3.5"
+  }
+}
