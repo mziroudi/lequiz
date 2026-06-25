@@ -46,8 +46,108 @@ function ResetIcon() {
   );
 }
 
+function FlashcardSlide({
+  card,
+  cardNumber,
+  totalCards,
+  revealed,
+  onReveal,
+}) {
+  const isBlueCard = cardNumber % 2 === 1;
+  const sectionLabel = getSectionLabel(card.section);
+
+  return (
+    <>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={isBlueCard ? 'glow-blue' : 'glow-orange'}
+          className={`${styles.glow} ${isBlueCard ? styles.glowBlue : styles.glowOrange}`}
+          aria-hidden="true"
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.92 }}
+          transition={{ duration: 0.5, ease: easeSmooth }}
+        />
+      </AnimatePresence>
+
+      <div className={styles.flipScene}>
+        <motion.div
+          className={styles.flipInner}
+          initial={false}
+          animate={{ rotateY: revealed ? 180 : 0 }}
+          transition={flipTransition}
+          style={{ transformStyle: 'preserve-3d' }}
+        >
+          <article
+            className={`${styles.cardFace} ${styles.cardFront} ${isBlueCard ? styles.blueCard : styles.orangeCard}`}
+            aria-labelledby="card-question"
+            onClick={onReveal}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onReveal();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <header className={styles.cardHeader}>
+              <span className={styles.sectionBadge}>{sectionLabel}</span>
+              <span className={styles.counter}>
+                {cardNumber} / {totalCards}
+              </span>
+            </header>
+
+            <h2 id="card-question" className={styles.questionText}>
+              {card.question}
+            </h2>
+
+            <motion.button
+              type="button"
+              className={styles.revealButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                onReveal();
+              }}
+              aria-label="Afficher la réponse"
+              whileHover={{ scale: 1.03, color: '#ffffff' }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15 }}
+            >
+              Afficher la réponse
+            </motion.button>
+          </article>
+
+          <article
+            className={`${styles.cardFace} ${styles.cardBack} ${isBlueCard ? styles.backFromBlue : styles.backFromOrange}`}
+            aria-labelledby="card-answer"
+          >
+            <header className={styles.cardHeaderBack}>
+              <span className={styles.sectionBadgeBack}>{sectionLabel}</span>
+              <span className={styles.counterBack}>
+                {cardNumber} / {totalCards}
+              </span>
+            </header>
+
+            <motion.p
+              id="card-answer"
+              className={styles.answerText}
+              initial={false}
+              animate={{ opacity: revealed ? 1 : 0 }}
+              transition={{ duration: 0.35, delay: revealed ? 0.25 : 0 }}
+            >
+              {card.correctAnswer}
+            </motion.p>
+          </article>
+        </motion.div>
+      </div>
+    </>
+  );
+}
+
 export default function Flashcard({
   card,
+  cardKey,
   cardNumber,
   totalCards,
   revealed,
@@ -60,8 +160,6 @@ export default function Flashcard({
   isLastCard,
 }) {
   const [slideDirection, setSlideDirection] = useState('next');
-  const isBlueCard = cardNumber % 2 === 1;
-  const sectionLabel = getSectionLabel(card.section);
 
   function handlePrev() {
     setSlideDirection('prev');
@@ -88,22 +186,10 @@ export default function Flashcard({
         Choisir une section
       </motion.button>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={isBlueCard ? 'glow-blue' : 'glow-orange'}
-          className={`${styles.glow} ${isBlueCard ? styles.glowBlue : styles.glowOrange}`}
-          aria-hidden="true"
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.92 }}
-          transition={{ duration: 0.5, ease: easeSmooth }}
-        />
-      </AnimatePresence>
-
       <AnimatePresence mode="wait" custom={slideDirection}>
         <motion.div
-          key={cardNumber}
-          className={styles.flipScene}
+          key={cardKey}
+          className={styles.slideWrapper}
           custom={slideDirection}
           variants={slideVariants}
           initial="enter"
@@ -111,74 +197,13 @@ export default function Flashcard({
           exit="exit"
           transition={slideTransition}
         >
-          <motion.div
-            className={styles.flipInner}
-            animate={{ rotateY: revealed ? 180 : 0 }}
-            transition={flipTransition}
-            style={{ transformStyle: 'preserve-3d' }}
-          >
-            <article
-              className={`${styles.cardFace} ${styles.cardFront} ${isBlueCard ? styles.blueCard : styles.orangeCard}`}
-              aria-labelledby="card-question"
-              onClick={onReveal}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onReveal();
-                }
-              }}
-              role="button"
-              tabIndex={0}
-            >
-              <header className={styles.cardHeader}>
-                <span className={styles.sectionBadge}>{sectionLabel}</span>
-                <span className={styles.counter}>
-                  {cardNumber} / {totalCards}
-                </span>
-              </header>
-
-              <h2 id="card-question" className={styles.questionText}>
-                {card.question}
-              </h2>
-
-              <motion.button
-                type="button"
-                className={styles.revealButton}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onReveal();
-                }}
-                aria-label="Afficher la réponse"
-                whileHover={{ scale: 1.03, color: '#ffffff' }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.15 }}
-              >
-                Afficher la réponse
-              </motion.button>
-            </article>
-
-            <article
-              className={`${styles.cardFace} ${styles.cardBack} ${isBlueCard ? styles.backFromBlue : styles.backFromOrange}`}
-              aria-labelledby="card-answer"
-            >
-              <header className={styles.cardHeaderBack}>
-                <span className={styles.sectionBadgeBack}>{sectionLabel}</span>
-                <span className={styles.counterBack}>
-                  {cardNumber} / {totalCards}
-                </span>
-              </header>
-
-              <motion.p
-                id="card-answer"
-                className={styles.answerText}
-                initial={false}
-                animate={{ opacity: revealed ? 1 : 0 }}
-                transition={{ duration: 0.35, delay: revealed ? 0.25 : 0 }}
-              >
-                {card.correctAnswer}
-              </motion.p>
-            </article>
-          </motion.div>
+          <FlashcardSlide
+            card={card}
+            cardNumber={cardNumber}
+            totalCards={totalCards}
+            revealed={revealed}
+            onReveal={onReveal}
+          />
         </motion.div>
       </AnimatePresence>
 

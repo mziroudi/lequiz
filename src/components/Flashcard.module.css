@@ -53,6 +53,14 @@
   z-index: 1;
 }
 
+.slideWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
 .flipInner {
   position: relative;
   width: 100%;

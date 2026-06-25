@@ -67,23 +67,20 @@ export function useQuiz() {
     });
   }, [currentIndex]);
 
-  const goToCard = useCallback((index) => {
-    setCurrentIndex(index);
-    setRevealed(Boolean(revealedCards[index]));
-  }, [revealedCards]);
-
   const nextCard = useCallback(() => {
+    setRevealed(false);
     if (currentIndex + 1 >= activeCards.length) {
       setScreen('result');
       return;
     }
-    goToCard(currentIndex + 1);
-  }, [currentIndex, activeCards.length, goToCard]);
+    setCurrentIndex(currentIndex + 1);
+  }, [currentIndex, activeCards.length]);
 
   const prevCard = useCallback(() => {
     if (currentIndex <= 0) return;
-    goToCard(currentIndex - 1);
-  }, [currentIndex, goToCard]);
+    setRevealed(false);
+    setCurrentIndex(currentIndex - 1);
+  }, [currentIndex]);
 
   const restartQuiz = useCallback(() => {
     setCurrentIndex(0);

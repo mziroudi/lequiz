@@ -51,6 +51,7 @@ export default function App() {
         {screen === 'card' && currentCard && (
           <Flashcard
             card={currentCard}
+            cardKey={`${selectedSection ?? 'all'}-${currentIndex}`}
             cardNumber={currentIndex + 1}
             totalCards={totalCards}
             revealed={revealed}
